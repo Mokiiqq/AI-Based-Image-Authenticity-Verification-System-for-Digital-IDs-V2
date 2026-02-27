@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Form</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="left">
+            <img src="imgs/logo.png" alt="logo" id="logoimg">
+        </div>
+
+        <div class="right">
+            <h1>Welcome Back!</h1>
+            <form id="loginForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <div id="message" style="color: red; text-align: center; margin: 10px 0;"></div>
+
+            <button type="submit">Login</button>
+            </form>
+
+            <p class="register-text">
+                Don’t have an account? <a href="register.html">Register</a>
+            </p>
+
+            <div class="social-icons">
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></a>
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="Viber"></a>
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Telegram"></a>
+            </div>
+        </div>
+        
+    </div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const messageDiv = document.getElementById('message');
+    
+    try {
+        const response = await fetch('http://localhost:5000/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            messageDiv.style.color = 'green';
+            messageDiv.textContent = 'Login successful! Redirecting...';
+
+            sessionStorage.setItem('username', username);
+
+            setTimeout(() => {
+                window.location.href = 'upload.html';
+            }, 1000);
+        } else {
+            messageDiv.style.color = 'red';
+            messageDiv.textContent = data.message;
+        }
+    } catch (error) {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'Server error';
+    }
+});
+</script>
+
+</body>
+</html>

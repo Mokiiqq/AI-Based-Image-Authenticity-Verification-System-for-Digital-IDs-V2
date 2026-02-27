@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="left">
+            <img src="imgs/logo.png" alt="logo" id="logoimg">
+        </div>
+
+        <div class="right">
+            <h1>Welcome Back!</h1>
+            <form id="registerForm">
+
+            <label for="fullname">Fullname:</label>
+            <input type="text" id="fullname" name="fullname" required>
+
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="con-password">Confirm Password:</label>
+            <input type="password" id="con-password" name="con-password" required>
+            
+            <div id="message" style="color: red; text-align: center; margin: 10px 0;"></div>
+
+            <button type="submit">Register</button>
+            </form>
+
+            <p class="register-text">
+                Yes i have an account? <a href="login.html">Login</a>
+            </p>
+
+            <div class="social-icons">
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></a>
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="Viber"></a>
+                <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Telegram"></a>
+            </div>
+        </div>
+        
+    </div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const fullname = document.getElementById('fullname').value;
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('con-password').value;
+    const messageDiv = document.getElementById('message');
+    
+    if (password !== confirmPassword) {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'Passwords do not match!';
+        return;
+    }
+    
+    try {
+        const response = await fetch('http://localhost:5000/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ fullname, username, email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            messageDiv.style.color = 'green';
+            messageDiv.textContent = 'Registration successful!';
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        } else {
+            messageDiv.style.color = 'red';
+            messageDiv.textContent = data.message;
+        }
+    } catch (error) {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'Server error';
+    }
+});
+</script>
+
+</body>
+</html>

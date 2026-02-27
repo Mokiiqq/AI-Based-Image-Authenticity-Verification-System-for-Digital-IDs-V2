@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload History</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg-main: #f3f4f8;
+    --card-bg: #ffffff;
+    --ink: #1a1f3a;
+    --muted: #6f7695;
+    --line: #d7dbef;
+    --accent: #4f65ff;
+    --good: #12844d;
+    --bad: #c1283d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    background:
+        radial-gradient(circle at 8% 10%, #d9deff 0, transparent 35%),
+        radial-gradient(circle at 92% 92%, #e3e7ff 0, transparent 40%),
+        var(--bg-main);
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.container {
+    width: min(900px, 100%);
+    margin: 0 auto;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(43, 57, 148, 0.12);
+    overflow: hidden;
+}
+
+.head {
+    padding: 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+h2 {
+    margin: 0;
+    color: var(--ink);
+}
+
+.btn {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #f5f7ff;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+}
+
+th {
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.pill.real {
+    color: var(--good);
+    background: #e8f7ee;
+}
+
+.pill.fake {
+    color: var(--bad);
+    background: #fdecef;
+}
+
+#status {
+    padding: 18px 22px;
+    color: var(--muted);
+}
+
+@media (max-width: 640px) {
+    .head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="head">
+        <h2>Your Upload History</h2>
+        <button class="btn" type="button" onclick="window.location.href='upload.html'">Back To Upload</button>
+    </div>
+    <div id="status">Loading history...</div>
+    <div class="table-wrap">
+        <table id="historyTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const username = sessionStorage.getItem('username');
+const statusEl = document.getElementById('status');
+const table = document.getElementById('historyTable');
+const body = document.getElementById('historyBody');
+
+if (!username) {
+    window.location.href = 'login.html';
+}
+
+fetch('http://localhost:5000/api/history', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ username })
+})
+.then(res => res.json())
+.then(data => {
+    if (!Array.isArray(data) || data.length === 0) {
+        statusEl.textContent = 'No uploads yet.';
+        return;
+    }
+
+    statusEl.style.display = 'none';
+    table.style.display = 'table';
+
+    data.forEach(row => {
+        const resultText = String(row.result || '').toUpperCase();
+        const isReal = resultText.includes('REAL');
+        const badgeClass = isReal ? 'real' : 'fake';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${row.created_at || '-'}</td>
+            <td><span class="pill ${badgeClass}">${row.result || '-'}</span></td>
+        `;
+        body.appendChild(tr);
+    });
+})
+.catch(() => {
+    statusEl.textContent = 'Unable to load history right now.';
+});
+</script>
+</body>
+</html>
+

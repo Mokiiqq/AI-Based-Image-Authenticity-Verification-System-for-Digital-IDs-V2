@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Valid ID</title>
+
+    <style>
+        :root {
+            --bg-main: #f3f4f8;
+            --card-bg: #ffffff;
+            --ink: #1a1f3a;
+            --muted: #6f7695;
+            --line: #d7dbef;
+            --accent: #4f65ff;
+            --accent-strong: #3448d4;
+            --good: #12844d;
+            --bad: #c1283d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background:
+                radial-gradient(circle at 8% 10%, #d9deff 0, transparent 35%),
+                radial-gradient(circle at 92% 92%, #e3e7ff 0, transparent 40%),
+                var(--bg-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: 0 16px 40px rgba(43, 57, 148, 0.12);
+            width: min(560px, 100%);
+            padding: 28px;
+            overflow: hidden;
+        }
+
+        /* Reset any inherited styles that may conflict */
+        .container * {
+            box-sizing: border-box;
+        }
+
+        h2 {
+            margin: 0;
+            text-align: left;
+            font-size: 1.8rem;
+            line-height: 1.1;
+            color: var(--ink);
+        }
+
+        .subtitle {
+            margin-top: 8px;
+            margin-bottom: 22px;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-top: 12px;
+            margin-bottom: 8px;
+            color: var(--ink);
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background-color: #fafbff;
+            color: var(--ink);
+        }
+
+        .preview {
+            margin-top: 14px;
+            text-align: center;
+        }
+
+        .preview img {
+            width: min(280px, 100%);
+            margin-top: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            box-shadow: 0 8px 20px rgba(53, 68, 165, 0.15);
+            display: none;
+        }
+
+        .main-btn {
+            width: 100%;
+            margin-top: 22px;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, var(--accent), #6b7eff);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .main-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(79, 101, 255, 0.35);
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .action-btn {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff !important;
+            color: var(--ink) !important;
+            padding: 11px 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+            width: 100%;
+            max-width: 100%;
+            display: block;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background: #f5f7ff !important;
+            border-color: #c9d0fa;
+        }
+
+        #welcomeUser {
+            margin: 10px 0 0;
+            color: var(--accent-strong);
+            font-weight: 500;
+        }
+
+        #message {
+            min-height: 24px;
+            margin: 14px 0 8px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        #result {
+            display: none;
+            text-align: center;
+            margin: 12px 0;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: #f8f9ff;
+        }
+
+        .ok {
+            color: var(--good);
+        }
+
+        .bad {
+            color: var(--bad);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 1.45rem;
+            }
+
+            .actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Upload Your Valid ID</h2>
+        <p class="subtitle">Submit a clear ID image and we will verify if it is real or fake.</p>
+        <p id="welcomeUser"></p>
+
+        <form id="uploadForm" enctype="multipart/form-data">
+
+            <label for="idFront">Upload ID (Front)</label>
+            <input type="file" id="idFront" accept="image/*" required>
+            <div class="preview">
+                <img id="previewFront">
+            </div>
+
+            <div id="message"></div>
+            <div id="result"></div>
+
+            <button class="main-btn" type="submit">Submit ID</button>
+        </form>
+
+        <div class="actions">
+            <button class="action-btn" onclick="logout()" type="button">Logout</button>
+            <button class="action-btn" onclick="window.location.href='history.html'" type="button">View History</button>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <script>
+        const PYTHON_API = 'http://localhost:5000';
+
+        const username = sessionStorage.getItem('username');
+
+        if (!username) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('welcomeUser').textContent = `Welcome, ${username}!`;
+
+        let idFrontData = null;
+
+        document.getElementById("idFront").addEventListener("change", function (event) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                const img = document.getElementById("previewFront");
+                img.src = reader.result;
+                img.style.display = "block";
+                idFrontData = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const messageDiv = document.getElementById('message');
+            const resultDiv = document.getElementById('result');
+
+            messageDiv.textContent = "Analyzing...";
+
+            try {
+                // STEP 1 → Send to AI
+                const aiResponse = await fetch(`${PYTHON_API}/api/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idFront: idFrontData })
+                });
+
+                const aiData = await aiResponse.json();
+
+                if (!aiData.success) {
+                    messageDiv.textContent = "AI failed";
+                    return;
+                }
+
+                const prediction = aiData.prediction;
+
+                // STEP 2 → Save to DB
+                await fetch(`${PYTHON_API}/api/save-upload`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        image: idFrontData,
+                        result: prediction
+                    })
+                });
+
+                messageDiv.textContent = "";
+                resultDiv.style.display = 'block';
+
+                if (prediction === 'REAL ID') {
+                    resultDiv.innerHTML = `<h3 class="ok">REAL ID</h3>`;
+                } else {
+                    resultDiv.innerHTML = `<h3 class="bad">FAKE ID</h3>`;
+                }
+
+            } catch (err) {
+                messageDiv.textContent = "Server Error";
+            }
+        });
+    </script>
+</body>
+
+</html>
