@@ -9,7 +9,9 @@ import base64
 from load_model import load_model
 from database import init_db, create_user, verify_user, user_exists, save_upload, get_upload_history
 
-app = Flask(__name__)
+# Serve frontend static files from the same server
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend', 'project')
+app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
 CORS(app)
 
 init_db()
@@ -163,6 +165,18 @@ def history():
 def health():
     """Health check endpoint"""
     return jsonify({'status': 'ok', 'message': 'Server is running'}), 200
+
+@app.route('/')
+def serve_index():
+    return app.send_static_file('login.html')
+
+@app.route('/<path:path>')
+def serve_frontend(path):
+    """Serve frontend files, fallback to login.html"""
+    try:
+        return app.send_static_file(path)
+    except Exception:
+        return app.send_static_file('login.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

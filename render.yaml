@@ -5,7 +5,6 @@ databases:
     user: cuatro
 
 services:
-  # Backend API
   - type: web
     name: cuatro-api
     runtime: python
@@ -19,12 +18,3 @@ services:
           property: connectionString
       - key: PYTHON_VERSION
         value: "3.11.6"
-
-staticSites:
-  - name: cuatro-frontend
-    buildCommand: echo "Static site, no build needed"
-    staticPublishPath: frontend/project
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: no-cache

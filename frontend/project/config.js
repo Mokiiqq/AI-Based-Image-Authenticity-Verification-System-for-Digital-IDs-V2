@@ -1,3 +1,3 @@
-// Change this to your Render backend URL after deploying
-// Example: const API_BASE = 'https://cuatro-api.onrender.com';
-const API_BASE = 'http://localhost:5000';
+// API_BASE is empty because frontend is served from the same Flask server.
+// For local dev, run Flask on port 5000 and open http://localhost:5000
+const API_BASE = '';
