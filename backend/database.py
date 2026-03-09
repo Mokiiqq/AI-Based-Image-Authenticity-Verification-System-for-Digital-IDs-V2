@@ -2,40 +2,73 @@ import sqlite3
 import hashlib
 import os
 
-DB_PATH = "users.db"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_db_connection():
-    """Create a database connection"""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    """Create a database connection — PostgreSQL if DATABASE_URL is set, else SQLite"""
+    if DATABASE_URL:
+        import psycopg2
+        import psycopg2.extras
+        conn = psycopg2.connect(DATABASE_URL)
+        return conn
+    else:
+        conn = sqlite3.connect("users.db")
+        conn.row_factory = sqlite3.Row
+        return conn
+
+def _use_pg():
+    return DATABASE_URL is not None
+
+def _ph(index):
+    """Return placeholder style: %s for Postgres, ? for SQLite"""
+    return "%s" if _use_pg() else "?"
 
 def init_db():
-    """Initialize the database with users table"""
+    """Initialize the database with users and uploads tables"""
     conn = get_db_connection()
     cursor = conn.cursor()
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fullname TEXT NOT NULL,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS uploads (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL,
-            image TEXT NOT NULL,
-            result TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
+
+    if _use_pg():
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                fullname TEXT NOT NULL,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS uploads (
+                id SERIAL PRIMARY KEY,
+                username TEXT NOT NULL,
+                image TEXT NOT NULL,
+                result TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+    else:
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fullname TEXT NOT NULL,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS uploads (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                image TEXT NOT NULL,
+                result TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
     conn.commit()
     conn.close()
     print("Database initialized successfully")
@@ -51,18 +84,18 @@ def create_user(fullname, username, email, password):
         cursor = conn.cursor()
         
         password_hash = hash_password(password)
-        
-        cursor.execute('''
+        p = "%s" if _use_pg() else "?"
+        cursor.execute(f'''
             INSERT INTO users (fullname, username, email, password_hash)
-            VALUES (?, ?, ?, ?)
+            VALUES ({p}, {p}, {p}, {p})
         ''', (fullname, username, email, password_hash))
         
         conn.commit()
         conn.close()
         return True
-    except sqlite3.IntegrityError:
-        return False
     except Exception as e:
+        if 'unique' in str(e).lower() or 'duplicate' in str(e).lower() or 'integrity' in str(e).lower():
+            return False
         print(f"Error creating user: {e}")
         return False
 
@@ -73,10 +106,10 @@ def verify_user(username, password):
         cursor = conn.cursor()
         
         password_hash = hash_password(password)
-        
-        cursor.execute('''
+        p = "%s" if _use_pg() else "?"
+        cursor.execute(f'''
             SELECT * FROM users 
-            WHERE username = ? AND password_hash = ?
+            WHERE username = {p} AND password_hash = {p}
         ''', (username, password_hash))
         
         user = cursor.fetchone()
@@ -92,8 +125,8 @@ def user_exists(username):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
+        p = "%s" if _use_pg() else "?"
+        cursor.execute(f'SELECT id FROM users WHERE username = {p}', (username,))
         user = cursor.fetchone()
         conn.close()
         
@@ -107,17 +140,21 @@ def get_user(username):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        cursor.execute('''
+        p = "%s" if _use_pg() else "?"
+        cursor.execute(f'''
             SELECT id, fullname, username, email, created_at 
             FROM users 
-            WHERE username = ?
+            WHERE username = {p}
         ''', (username,))
         
         user = cursor.fetchone()
         conn.close()
-        
-        return dict(user) if user else None
+        if not user:
+            return None
+        if _use_pg():
+            cols = [desc[0] for desc in cursor.description]
+            return dict(zip(cols, user))
+        return dict(user)
     except Exception as e:
         print(f"Error getting user: {e}")
         return None
@@ -127,10 +164,10 @@ def save_upload(username, image, result):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        cursor.execute('''
+        p = "%s" if _use_pg() else "?"
+        cursor.execute(f'''
             INSERT INTO uploads (username, image, result)
-            VALUES (?, ?, ?)
+            VALUES ({p}, {p}, {p})
         ''', (username, image, result))
         
         conn.commit()
@@ -145,17 +182,19 @@ def get_upload_history(username):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        cursor.execute('''
+        p = "%s" if _use_pg() else "?"
+        cursor.execute(f'''
             SELECT id, result, created_at 
             FROM uploads 
-            WHERE username = ?
+            WHERE username = {p}
             ORDER BY created_at DESC
         ''', (username,))
         
         uploads = cursor.fetchall()
         conn.close()
-        
+        if _use_pg():
+            cols = [desc[0] for desc in cursor.description]
+            return [dict(zip(cols, row)) for row in uploads]
         return [dict(upload) for upload in uploads]
     except Exception as e:
         print(f"Error getting upload history: {e}")

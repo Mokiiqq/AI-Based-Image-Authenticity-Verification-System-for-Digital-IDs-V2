@@ -150,6 +150,7 @@ th {
     </div>
 </div>
 
+<script src="config.js"></script>
 <script>
 const username = sessionStorage.getItem('username');
 const statusEl = document.getElementById('status');
@@ -160,7 +161,7 @@ if (!username) {
     window.location.href = 'login.html';
 }
 
-fetch('http://localhost:5000/api/history', {
+fetch(`${API_BASE}/api/history`, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ username })

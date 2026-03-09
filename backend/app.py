@@ -4,6 +4,7 @@ import torch
 from PIL import Image
 from torchvision import transforms
 import io
+import os
 import base64
 from load_model import load_model
 from database import init_db, create_user, verify_user, user_exists, save_upload, get_upload_history
@@ -164,4 +165,5 @@ def health():
     return jsonify({'status': 'ok', 'message': 'Server is running'}), 200
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
