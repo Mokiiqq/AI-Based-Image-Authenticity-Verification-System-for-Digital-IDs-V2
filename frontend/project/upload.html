@@ -295,8 +295,10 @@
 
                 if (prediction === 'REAL ID') {
                     resultDiv.innerHTML = `<h3 class="ok">REAL ID</h3>`;
-                } else {
+                } else if (prediction === 'FAKE ID') {
                     resultDiv.innerHTML = `<h3 class="bad">FAKE ID</h3>`;
+                } else {
+                    resultDiv.innerHTML = `<h3 class="bad">NOT A VALID ID</h3>`;
                 }
 
             } catch (err) {

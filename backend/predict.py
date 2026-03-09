@@ -20,7 +20,7 @@ def predict():
         probs = torch.softmax(outputs, dim=1)
         confidence, predicted = torch.max(probs, 1)
 
-    labels = ["FAKE ID", "REAL ID"]
+    labels = ["FAKE ID", "OTHER", "REAL ID"]
 
     print(f"Prediction: {labels[predicted.item()]}")
     print(f"Confidence: {confidence.item():.2f}")

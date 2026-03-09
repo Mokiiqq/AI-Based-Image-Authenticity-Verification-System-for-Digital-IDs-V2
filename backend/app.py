@@ -78,7 +78,7 @@ def predict():
         
         result_front = process_image(id_front)
         
-        overall_prediction = "REAL ID" if result_front['prediction'] == "REAL ID" else "FAKE ID"
+        overall_prediction = result_front['prediction']
         avg_confidence = result_front['confidence']
         return jsonify({
             'success': True,
@@ -106,7 +106,7 @@ def process_image(base64_image):
             probs = torch.softmax(outputs, dim=1)
             confidence, predicted = torch.max(probs, 1)
         
-        labels = ["FAKE ID", "REAL ID"]
+        labels = ["FAKE ID", "OTHER", "REAL ID"]
         
         print(f"Raw outputs: {outputs}")
         print(f"Probabilities: {probs}")
