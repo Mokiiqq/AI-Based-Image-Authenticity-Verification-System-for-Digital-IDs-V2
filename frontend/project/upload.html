@@ -512,7 +512,7 @@
             document.getElementById('resultModal').classList.add('open');
 
         } catch (err) {
-            messageDiv.textContent = 'Server Error';
+            messageDiv.textContent = 'Server Error: ' + err.message;
         }
     });
 
