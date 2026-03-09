@@ -1,6 +1,5 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
-torchvision
+onnxruntime
+numpy
 Pillow
 flask
 flask-cors

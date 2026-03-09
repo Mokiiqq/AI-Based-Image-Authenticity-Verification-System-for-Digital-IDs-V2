@@ -1,12 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import torch
+import onnxruntime as ort
+import numpy as np
 from PIL import Image
-from torchvision import transforms
 import io
 import os
 import base64
-from load_model import load_model
 from database import init_db, create_user, verify_user, user_exists, save_upload, get_upload_history
 
 # Serve frontend static files from the same server
@@ -17,14 +16,10 @@ CORS(app)
 
 init_db()
 
-print("Loading model...")
-model = load_model()
-print("Model loaded successfully!")
-
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-])
+print("Loading ONNX model...")
+MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'id_detector.onnx')
+session = ort.InferenceSession(MODEL_PATH)
+print("ONNX model loaded successfully!")
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -102,25 +97,32 @@ def process_image(base64_image):
         
         image_data = base64.b64decode(base64_image)
         image = Image.open(io.BytesIO(image_data)).convert("RGB")
+        image = image.resize((224, 224))
         
-        img_tensor = transform(image).unsqueeze(0)
+        # Convert to numpy array: HWC -> CHW, normalize to [0,1] float32
+        img_array = np.array(image, dtype=np.float32) / 255.0
+        img_array = np.transpose(img_array, (2, 0, 1))  # CHW
+        img_array = np.expand_dims(img_array, axis=0)    # NCHW
         
-        with torch.no_grad():
-            outputs = model(img_tensor)
-            probs = torch.softmax(outputs, dim=1)
-            confidence, predicted = torch.max(probs, 1)
+        # Run inference
+        outputs = session.run(None, {'input': img_array})[0]  # shape (1, 3)
+        
+        # Softmax
+        exp_vals = np.exp(outputs - np.max(outputs, axis=1, keepdims=True))
+        probs = exp_vals / np.sum(exp_vals, axis=1, keepdims=True)
+        
+        predicted = int(np.argmax(probs, axis=1)[0])
+        confidence = float(np.max(probs))
         
         labels = ["FAKE ID", "OTHER", "REAL ID"]
         
-        print(f"Raw outputs: {outputs}")
-        print(f"Probabilities: {probs}")
-        print(f"Predicted class: {predicted.item()}")
-        print(f"Confidence: {confidence.item()}")
-        print(f"Prediction: {labels[predicted.item()]}")
+        print(f"Predicted class: {predicted}")
+        print(f"Confidence: {confidence}")
+        print(f"Prediction: {labels[predicted]}")
         
         return {
-            'prediction': labels[predicted.item()],
-            'confidence': confidence.item()
+            'prediction': labels[predicted],
+            'confidence': confidence
         }
         
     except Exception as e:
@@ -168,7 +170,7 @@ def health():
     import sys
     return jsonify({
         'status': 'ok',
-        'model_loaded': model is not None,
+        'model_loaded': session is not None,
         'python': sys.version,
         'cwd': os.getcwd()
     }), 200
