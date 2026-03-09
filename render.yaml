@@ -9,7 +9,7 @@ services:
   - type: web
     name: cuatro-api
     runtime: python
-    plan: free
+    plan: starter
     buildCommand: ./build.sh
     startCommand: cd backend && gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
@@ -21,10 +21,9 @@ services:
         value: "3.11.6"
 
   # Frontend static site
-  - type: web
+  - type: static
     name: cuatro-frontend
-    runtime: static
-    plan: free
+    plan: starter
     buildCommand: echo "Static site, no build needed"
     staticPublishPath: frontend/project
     headers:
