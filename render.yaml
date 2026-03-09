@@ -20,10 +20,8 @@ services:
       - key: PYTHON_VERSION
         value: "3.11.6"
 
-  # Frontend static site
-  - type: static
-    name: cuatro-frontend
-    plan: starter
+staticSites:
+  - name: cuatro-frontend
     buildCommand: echo "Static site, no build needed"
     staticPublishPath: frontend/project
     headers:
