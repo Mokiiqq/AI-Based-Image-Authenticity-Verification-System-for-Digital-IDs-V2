@@ -6,162 +6,208 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Valid ID</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --bg-main: #f3f4f8;
+            --bg-main: #eef0fb;
             --card-bg: #ffffff;
             --ink: #1a1f3a;
             --muted: #6f7695;
             --line: #d7dbef;
             --accent: #4f65ff;
+            --accent-light: #e8ebff;
             --accent-strong: #3448d4;
             --good: #12844d;
             --bad: #c1283d;
+            --sidebar-w: 220px;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             background:
                 radial-gradient(circle at 8% 10%, #d9deff 0, transparent 35%),
                 radial-gradient(circle at 92% 92%, #e3e7ff 0, transparent 40%),
                 var(--bg-main);
             display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            padding: 24px;
         }
 
-        .container {
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--card-bg);
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            padding: 22px 16px;
+            position: relative;
+            transition: width .25s ease, padding .25s ease;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .brand img { width: 80px; height: 80px; object-fit: contain; }
+        .brand-label { font-size: .7rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+
+        .menu-label {
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin: 14px 0 10px;
+        }
+
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: var(--ink);
+            font-size: .93rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .nav-item:hover, .nav-item.active { background: var(--accent-light); color: var(--accent); }
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        .sidebar-spacer { flex: 1; }
+
+        .sidebar-bottom { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); padding-top: 14px; }
+
+        .welcome-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 18px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: default;
+        }
+        .welcome-box .avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: var(--accent-light);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .85rem;
+            flex-shrink: 0;
+        }
+        .welcome-info { overflow: hidden; }
+        .welcome-label { font-size: .75rem; color: var(--muted); }
+        .welcome-name { font-size: .93rem; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .welcome-arrow { margin-left: auto; color: var(--muted); font-size: 14px; }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1;
+            padding: 36px 42px;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 28px;
+        }
+        .page-title svg { width: 28px; height: 28px; color: var(--ink); }
+
+        /* ── DROP ZONE ── */
+        .upload-card {
             background: var(--card-bg);
             border: 1px solid var(--line);
             border-radius: 18px;
-            box-shadow: 0 16px 40px rgba(43, 57, 148, 0.12);
-            width: min(560px, 100%);
-            padding: 28px;
-            overflow: hidden;
+            padding: 32px;
+            box-shadow: 0 8px 28px rgba(43, 57, 148, .08);
         }
 
-        /* Reset any inherited styles that may conflict */
-        .container * {
-            box-sizing: border-box;
-        }
-
-        h2 {
-            margin: 0;
-            text-align: left;
-            font-size: 1.8rem;
-            line-height: 1.1;
-            color: var(--ink);
-        }
-
-        .subtitle {
-            margin-top: 8px;
-            margin-bottom: 22px;
-            color: var(--muted);
-            font-size: 0.98rem;
-        }
-
-        label {
-            font-weight: 600;
-            display: block;
-            margin-top: 12px;
-            margin-bottom: 8px;
-            color: var(--ink);
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            background-color: #fafbff;
-            color: var(--ink);
-        }
-
-        .preview {
-            margin-top: 14px;
+        .dropzone {
+            border: 2px dashed var(--line);
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 44px 24px;
             text-align: center;
-        }
-
-        .preview img {
-            width: min(280px, 100%);
-            margin-top: 8px;
-            border-radius: 12px;
-            border: 1px solid var(--line);
-            box-shadow: 0 8px 20px rgba(53, 68, 165, 0.15);
-            display: none;
-        }
-
-        .main-btn {
-            width: 100%;
-            margin-top: 22px;
-            padding: 13px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(90deg, var(--accent), #6b7eff);
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: border-color .2s, background .2s;
         }
+        .dropzone.dragover { border-color: var(--accent); background: var(--accent-light); }
+        .dropzone svg.upload-icon { width: 48px; height: 48px; color: var(--muted); margin-bottom: 12px; }
+        .dropzone-text { font-size: .95rem; color: var(--muted); }
+        .dropzone-or { font-size: .85rem; color: var(--muted); margin: 6px 0; }
 
-        .main-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(79, 101, 255, 0.35);
+        /* Dropzone thumbnail preview */
+        .dropzone-preview { display: none; flex-direction: column; align-items: center; gap: 10px; }
+        .dropzone-preview img { max-height: 180px; max-width: 100%; border-radius: 10px; border: 1px solid var(--line); object-fit: contain; }
+        .dropzone-preview .file-info { font-size: .85rem; color: var(--muted); }
+        .dropzone-preview .change-btn {
+            font-size: .82rem; color: var(--accent); background: none; border: none;
+            cursor: pointer; font-family: inherit; font-weight: 600; text-decoration: underline;
         }
+        .dropzone.has-preview .dropzone-default { display: none; }
+        .dropzone.has-preview .dropzone-preview { display: flex; }
+        .dropzone.has-preview { padding: 24px; }
 
-        .actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 16px;
-            width: 100%;
-            max-width: 100%;
-        }
-
-        .action-btn {
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            background: #fff !important;
-            color: var(--ink) !important;
-            padding: 11px 12px;
+        .browse-btn {
+            display: inline-block;
+            padding: 8px 22px;
+            border: 1.5px solid var(--accent);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--accent);
             font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: 500;
+            font-size: .9rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.15s ease, border-color 0.15s ease;
-            width: 100%;
-            max-width: 100%;
-            display: block;
-            text-align: center;
+            transition: background .15s, color .15s;
         }
+        .browse-btn:hover { background: var(--accent); color: #fff; }
 
-        .action-btn:hover {
-            background: #f5f7ff !important;
-            border-color: #c9d0fa;
-        }
+        #idFront { display: none; }
 
-        #welcomeUser {
-            margin: 10px 0 0;
-            color: var(--accent-strong);
-            font-weight: 500;
+        /* ── MESSAGE / RESULT ── */
+        /* Spinner */
+        .spinner-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .spinner {
+            width: 22px; height: 22px;
+            border: 3px solid var(--line);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         #message {
             min-height: 24px;
-            margin: 14px 0 8px;
+            margin: 16px 0 4px;
             text-align: center;
             font-weight: 600;
             color: var(--muted);
         }
-
         #result {
             display: none;
             text-align: center;
@@ -171,141 +217,313 @@
             border: 1px solid var(--line);
             background: #f8f9ff;
         }
+        .ok  { color: var(--good); }
+        .bad { color: var(--bad); }
 
-        .ok {
-            color: var(--good);
+        .submit-btn {
+            width: 100%;
+            margin-top: 18px;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, var(--accent), #6b7eff);
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .15s;
+            display: none;          /* shown after file chosen */
+        }
+        .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(79,101,255,.35); }
+
+        /* ── RESULT MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 24, 56, .45);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 32px;
+            width: min(420px, 92vw);
+            box-shadow: 0 20px 50px rgba(30, 40, 120, .25);
+            text-align: center;
+            position: relative;
+            animation: modalIn .25s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(24px) scale(.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .bad {
-            color: var(--bad);
+        .modal-close {
+            position: absolute;
+            top: 14px; right: 16px;
+            background: none; border: none;
+            font-size: 1.3rem; color: var(--muted);
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-close:hover { color: var(--ink); }
+
+        .modal-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 18px;
         }
 
-        @media (max-width: 640px) {
-            .container {
-                padding: 20px;
-            }
+        .modal img {
+            max-height: 220px;
+            max-width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            box-shadow: 0 4px 14px rgba(53,68,165,.12);
+            object-fit: contain;
+            margin-bottom: 16px;
+        }
 
-            h2 {
-                font-size: 1.45rem;
-            }
+        .modal .pill {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 999px;
+            font-size: .95rem;
+            font-weight: 700;
+        }
+        .pill.real { color: var(--good); background: #e8f7ee; }
+        .pill.fake { color: var(--bad); background: #fdecef; }
+        .pill.other { color: #856404; background: #fff3cd; }
 
-            .actions {
-                grid-template-columns: 1fr;
-            }
+        .modal-confidence { font-size: .88rem; color: var(--muted); margin-top: 8px; }
+
+        .modal-btn {
+            margin-top: 20px;
+            padding: 11px 28px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--accent), #6b7eff);
+            color: #fff;
+            font-family: inherit;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform .15s, box-shadow .15s;
+        }
+        .modal-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(79,101,255,.3); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: 0; top: 0; height: 100vh; box-shadow: 4px 0 20px rgba(0,0,0,.1); }
+            .sidebar.collapsed { width: 0; }
+            .main { padding: 24px 18px; }
+            .recent-card { flex-direction: column; align-items: center; }
+            .recent-card img { width: 160px; }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <h2>Upload Your Valid ID</h2>
-        <p class="subtitle">Submit a clear ID image and we will verify if it is real or fake.</p>
-        <p id="welcomeUser"></p>
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+    <div class="brand">
+        <img src="imgs/dino.png" alt="Cuatro">
+    </div>
+    <hr style="border:none; border-top:1px solid var(--line); margin:10px 0;">
 
-        <form id="uploadForm" enctype="multipart/form-data">
+    <p class="menu-label">Menu</p>
+    <ul class="nav-list">
+        <li>
+            <a class="nav-item active" href="history.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                History
+            </a>
+        </li>
+    </ul>
 
-            <label for="idFront">Upload ID (Front)</label>
-            <input type="file" id="idFront" accept="image/*" required>
-            <div class="preview">
-                <img id="previewFront">
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-bottom">
+        <a class="nav-item" onclick="logout()" style="cursor:pointer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Log out
+        </a>
+    </div>
+
+    <div class="welcome-box">
+        <div class="avatar" id="avatarInitial">U</div>
+        <div class="welcome-info">
+            <div class="welcome-label">Welcome back</div>
+            <div class="welcome-name" id="welcomeUser">User</div>
+        </div>
+        <span class="welcome-arrow">›</span>
+    </div>
+</aside>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="main">
+
+    <div class="page-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload Area
+    </div>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div class="upload-card">
+            <div class="dropzone" id="dropzone">
+                <div class="dropzone-default">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3m0 0l4 4m-4-4L8 7"/><path d="M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/></svg>
+                    <p class="dropzone-text">Drag&amp;Drop files here</p>
+                    <p class="dropzone-or">or</p>
+                    <label class="browse-btn" for="idFront">Browse Files</label>
+                </div>
+                <div class="dropzone-preview">
+                    <img id="dropzoneThumb" alt="Preview">
+                    <span class="file-info" id="fileInfo"></span>
+                    <label class="change-btn" for="idFront">Change file</label>
+                </div>
             </div>
+            <input type="file" id="idFront" accept="image/*" required>
 
             <div id="message"></div>
             <div id="result"></div>
-
-            <button class="main-btn" type="submit">Submit ID</button>
-        </form>
-
-        <div class="actions">
-            <button class="action-btn" onclick="logout()" type="button">Logout</button>
-            <button class="action-btn" onclick="window.location.href='history.html'" type="button">View History</button>
+            <button class="submit-btn" id="submitBtn" type="submit">Submit ID</button>
         </div>
+    </form>
+
+</main>
+
+<!-- ── RESULT POPUP ── -->
+<div class="modal-overlay" id="resultModal">
+    <div class="modal">
+        <button class="modal-close" id="modalClose" type="button">&times;</button>
+        <h3 class="modal-title">Verification Result</h3>
+        <img id="previewFront" alt="Uploaded ID">
+        <div><span class="pill" id="recentPill"></span></div>
+        <p class="modal-confidence" id="recentConf"></p>
+        <button class="modal-btn" id="modalDone" type="button">Done</button>
     </div>
+</div>
 
-    <script>
-        function logout() {
-            sessionStorage.clear();
-            window.location.href = 'login.html';
-        }
-    </script>
+<script>
+    /* ── Auth guard ── */
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
 
-    <script>
-        const PYTHON_API = 'http://localhost:5000';
+    const PYTHON_API = 'http://localhost:5000';
+    const username = sessionStorage.getItem('username');
+    if (!username) window.location.href = 'login.html';
 
-        const username = sessionStorage.getItem('username');
+    document.getElementById('welcomeUser').textContent = username;
+    document.getElementById('avatarInitial').textContent = username.charAt(0).toUpperCase();
 
-        if (!username) {
-            window.location.href = 'login.html';
-        }
+    /* ── Drag & Drop ── */
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('idFront');
+    let idFrontData = null;
 
-        document.getElementById('welcomeUser').textContent = `Welcome, ${username}!`;
+    ['dragenter','dragover'].forEach(evt => {
+        dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    });
+    ['dragleave','drop'].forEach(evt => {
+        dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('dragover'); });
+    });
+    dropzone.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        if (dt.files.length) { fileInput.files = dt.files; handleFile(dt.files[0]); }
+    });
 
-        let idFrontData = null;
+    fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
 
-        document.getElementById("idFront").addEventListener("change", function (event) {
-            const reader = new FileReader();
-            reader.onload = function () {
-                const img = document.getElementById("previewFront");
-                img.src = reader.result;
-                img.style.display = "block";
-                idFrontData = reader.result;
+    function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            idFrontData = reader.result;
+
+            /* Dropzone inline preview */
+            document.getElementById('dropzoneThumb').src = idFrontData;
+            const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+            document.getElementById('fileInfo').textContent = file.name + ' \u2014 ' + sizeMB + ' MB';
+            dropzone.classList.add('has-preview');
+
+            /* Prepare modal preview image */
+            document.getElementById('previewFront').src = idFrontData;
+            document.getElementById('submitBtn').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /* ── Submit ── */
+    document.getElementById('uploadForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const messageDiv = document.getElementById('message');
+        const resultDiv  = document.getElementById('result');
+        messageDiv.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>Analyzing...</span></div>';
+
+        try {
+            const aiResponse = await fetch(`${PYTHON_API}/api/predict`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idFront: idFrontData })
+            });
+            const aiData = await aiResponse.json();
+
+            if (!aiData.success) { messageDiv.textContent = 'AI failed'; return; }
+
+            const prediction  = aiData.prediction;
+            const confidence  = aiData.confidence;
+
+            await fetch(`${PYTHON_API}/api/save-upload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, image: idFrontData, result: prediction })
+            });
+
+            messageDiv.textContent = '';
+            resultDiv.style.display = 'block';
+
+            if (prediction === 'REAL ID') {
+                resultDiv.innerHTML = '<h3 class="ok">REAL ID</h3>';
+            } else if (prediction === 'FAKE ID') {
+                resultDiv.innerHTML = '<h3 class="bad">FAKE ID</h3>';
+            } else {
+                resultDiv.innerHTML = '<h3 class="bad">NOT A VALID ID</h3>';
             }
-            reader.readAsDataURL(event.target.files[0]);
-        });
 
-        document.getElementById('uploadForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const messageDiv = document.getElementById('message');
-            const resultDiv = document.getElementById('result');
-
-            messageDiv.textContent = "Analyzing...";
-
-            try {
-                // STEP 1 → Send to AI
-                const aiResponse = await fetch(`${PYTHON_API}/api/predict`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idFront: idFrontData })
-                });
-
-                const aiData = await aiResponse.json();
-
-                if (!aiData.success) {
-                    messageDiv.textContent = "AI failed";
-                    return;
-                }
-
-                const prediction = aiData.prediction;
-
-                // STEP 2 → Save to DB
-                await fetch(`${PYTHON_API}/api/save-upload`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: username,
-                        image: idFrontData,
-                        result: prediction
-                    })
-                });
-
-                messageDiv.textContent = "";
-                resultDiv.style.display = 'block';
-
-                if (prediction === 'REAL ID') {
-                    resultDiv.innerHTML = `<h3 class="ok">REAL ID</h3>`;
-                } else if (prediction === 'FAKE ID') {
-                    resultDiv.innerHTML = `<h3 class="bad">FAKE ID</h3>`;
-                } else {
-                    resultDiv.innerHTML = `<h3 class="bad">NOT A VALID ID</h3>`;
-                }
-
-            } catch (err) {
-                messageDiv.textContent = "Server Error";
+            /* Update modal pill & open popup */
+            const pill = document.getElementById('recentPill');
+            pill.textContent = prediction;
+            pill.className = 'pill ' + (prediction === 'REAL ID' ? 'real' : prediction === 'FAKE ID' ? 'fake' : 'other');
+            if (confidence != null) {
+                document.getElementById('recentConf').textContent = 'Confidence: ' + (confidence * 100).toFixed(1) + '%';
             }
-        });
-    </script>
+            document.getElementById('resultModal').classList.add('open');
+
+        } catch (err) {
+            messageDiv.textContent = 'Server Error';
+        }
+    });
+
+    /* ── Modal close ── */
+    function closeModal() { document.getElementById('resultModal').classList.remove('open'); }
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalDone').addEventListener('click', closeModal);
+    document.getElementById('resultModal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+</script>
+
 </body>
 
 </html>
