@@ -465,6 +465,26 @@
         reader.readAsDataURL(file);
     }
 
+    /* ── Resize image to reduce payload ── */
+    function resizeImage(dataUrl, maxDim = 800) {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.width, h = img.height;
+                if (w > maxDim || h > maxDim) {
+                    const ratio = Math.min(maxDim / w, maxDim / h);
+                    w = Math.round(w * ratio);
+                    h = Math.round(h * ratio);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', 0.85));
+            };
+            img.src = dataUrl;
+        });
+    }
+
     /* ── Submit ── */
     document.getElementById('uploadForm').addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -473,14 +493,24 @@
         messageDiv.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><span>Analyzing...</span></div>';
 
         try {
+            /* Resize to keep payload small */
+            const compressed = await resizeImage(idFrontData);
+
             const aiResponse = await fetch(`${PYTHON_API}/api/predict`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ idFront: idFrontData })
+                body: JSON.stringify({ idFront: compressed })
             });
+
+            if (!aiResponse.ok) {
+                const errText = await aiResponse.text();
+                messageDiv.textContent = `Server Error (${aiResponse.status}): ${errText.substring(0, 200)}`;
+                return;
+            }
+
             const aiData = await aiResponse.json();
 
-            if (!aiData.success) { messageDiv.textContent = 'AI failed'; return; }
+            if (!aiData.success) { messageDiv.textContent = 'AI failed: ' + (aiData.message || ''); return; }
 
             const prediction  = aiData.prediction;
             const confidence  = aiData.confidence;
@@ -488,7 +518,7 @@
             await fetch(`${PYTHON_API}/api/save-upload`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, image: idFrontData, result: prediction })
+                body: JSON.stringify({ username, image: compressed, result: prediction })
             });
 
             messageDiv.textContent = '';
@@ -512,7 +542,7 @@
             document.getElementById('resultModal').classList.add('open');
 
         } catch (err) {
-            messageDiv.textContent = 'Server Error: ' + err.message;
+            messageDiv.textContent = 'Network Error: ' + err.message;
         }
     });
 

@@ -12,6 +12,7 @@ from database import init_db, create_user, verify_user, user_exists, save_upload
 # Serve frontend static files from the same server
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend', 'project')
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max request
 CORS(app)
 
 init_db()
@@ -164,7 +165,13 @@ def history():
 @app.route('/api/health', methods=['GET'])
 def health():
     """Health check endpoint"""
-    return jsonify({'status': 'ok', 'message': 'Server is running'}), 200
+    import sys
+    return jsonify({
+        'status': 'ok',
+        'model_loaded': model is not None,
+        'python': sys.version,
+        'cwd': os.getcwd()
+    }), 200
 
 @app.route('/')
 def serve_index():
